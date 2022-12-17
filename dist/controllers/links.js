@@ -57,6 +57,15 @@ class LinksController {
         res.json({ success: !!link });
     }
     ;
+    async searchLink(req, res) {
+        const linkData = req.body;
+        const link = await database_1.mysqlDt.getRepository(Link_entity_1.Link).find({ where: linkData }).catch((err) => {
+            console.error('search error:', err);
+            return null;
+        });
+        res.json({ success: !!link, data: link });
+    }
+    ;
 }
 __decorate([
     (0, routes_1.ControllerRoute)({
@@ -106,5 +115,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], LinksController.prototype, "updateLink", null);
+__decorate([
+    (0, routes_1.ControllerRoute)({
+        method: routes_1.METHOD.POST,
+        path: '/api/links/search',
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], LinksController.prototype, "searchLink", null);
 exports.LinksController = LinksController;
 //# sourceMappingURL=links.js.map

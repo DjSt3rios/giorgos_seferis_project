@@ -32,6 +32,7 @@
   <div class="side-menu-item" page="Manage" id="manage-links">Διαχείριση συνδέσμων</div>
   <div class="side-menu-item" page="Manage" id="manage-books">Διαχείριση Βιβλίων</div>
   <div class="side-menu-item" page="Manage" id="manage-login">Σύνδεση</div>
+  <div class="side-menu-item" page="Manage" id="manage-logout">Αποσύνδεση</div>
 </div>
 <main>
   <section id="Bio">
@@ -60,7 +61,7 @@
   </section>
   <section id="Photos" class="d-none">
     <div subcategory="index" class="p-20">
-      <div class="flex gap-30">
+      <div class="flex gap-30 flex-wrap">
         <img src="images/Giorgos_Seferis_1963.jpg" alt="Seferis">
         <img src="images/Seferis1.jpg" alt="Seferis">
         <img src="images/seferis2.jpg" alt="Seferis">
@@ -73,32 +74,61 @@
   </section>
   <section id="Books" class="d-none">
     <div subcategory="index" class="p-20">
-
+      <div class="flex flex-column">
+        <div>Καταχωρημένα βιβλία:</div>
+        <div class="flex flex-column" id="bookListGeneral"></div>
+      </div>
     </div>
     <div subcategory="myth" class="p-20 d-none">
-
+      <div class="flex flex-column">
+        <div>Καταχωρημένα μυθιστορήματα:</div>
+        <div class="flex flex-column" id="bookListMyth"></div>
+      </div>
     </div>
     <div subcategory="dok" class="p-20 d-none">
-
+      <div class="flex flex-column">
+        <div>Καταχωρημένα δοκίμια:</div>
+        <div class="flex flex-column" id="bookListDok"></div>
+      </div>
     </div>
   </section>
   <section id="Links" class="d-none">
     <div subcategory="index" class="p-20">
-
+      <div class="flex flex-column">
+        <div>Καταχωρημένα γενικοί σύνδεσμοι:</div>
+        <div class="flex flex-column" id="linkListGeneral"></div>
+      </div>
     </div>
     <div subcategory="ert" class="p-20 d-none">
-
+        <div class="flex flex-column">
+          <div>Καταχωρημένα σύνδεσμοι της ΕΡΤ:</div>
+          <div class="flex flex-column" id="linkListErt"></div>
+        </div>
     </div>
   </section>
   <section id="Manage" class="d-none">
     <div subcategory="index" class="p-20">
+      <div class="flex flex-column">
+        <div>Επιλέξτε κατηγορία:</div>
+        <div class="flex gap-10">
+          <button id="goManageBooks" type="button" class="btn" style="width: 150px;">Βιβλία</button>
+          <button id="goManageLinks" type="button" class="btn" style="width: 150px;">Σύνδεσμοι</button>
+        </div>
 
+      </div>
     </div>
     <div subcategory="books" class="p-20 d-none">
+      <div class="flex flex-column">
+        <div>Καταχωρημένα βιβλία:</div>
+        <div class="flex flex-column" id="bookListM"></div>
+      </div>
 
     </div>
     <div subcategory="links" class="p-20 d-none">
-
+      <div class="flex flex-column">
+        <div>Καταχωρημένοι σύνδεσμοι:</div>
+        <div class="flex flex-column" id="linkListM"></div>
+      </div>
     </div>
     <div subcategory="login" class="p-20 d-none flex flex-column text-center">
         <form id="loginForm" class="flex flex-column">
@@ -106,7 +136,7 @@
           <input type="text" id="loginUsername">
           <label>Password</label>
           <input type="password" id="loginPassword">
-          <button type="button" id="loginButton">Login</button>
+          <button type="button" id="loginButton"><div class="loading d-none"></div><span id="loginButtonText">Login</span></button>
           <div id="loginError" class="d-none error"></div>
         </form>
         <div id="no-account" class="d-inline">No account? <div id="showRegister" class="d-inline">Click here to create one!</div></div>
@@ -119,7 +149,7 @@
         <input type="password" id="registerPassword">
         <label>Repeat Password</label>
         <input type="password" id="registerRepeatPassword">
-        <button type="button" id="registerButton">Register</button>
+        <button type="button" id="registerButton"><div class="loading d-none"></div><span id="registerButtonText">Register</span></button>
         <div id="registerError" class="d-none error"></div>
       </form>
     </div>

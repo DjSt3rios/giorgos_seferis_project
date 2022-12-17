@@ -65,4 +65,16 @@ export class BooksController {
         });
         res.json({ success: !!book });
     };
+
+    @ControllerRoute({
+        method: METHOD.POST,
+        path: '/api/books/search',
+    }) async searchBook(req: Request, res: Response): Promise<void> {
+        const bookData: BookModel = req.body;
+        const book = await mysqlDt.getRepository(Book).find({ where: bookData }).catch((err) => {
+            console.error('search error:', err);
+            return null;
+        });
+        res.json({ success: !!book, data: book });
+    };
 }

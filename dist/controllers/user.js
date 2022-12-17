@@ -36,7 +36,7 @@ exports.UsersController = void 0;
 const routes_1 = require("../routes/routes");
 const database_1 = require("../database");
 const User_entity_1 = require("../entities/User.entity");
-const bcrypt = __importStar(require("bcrypt"));
+const bcrypt = __importStar(require("bcryptjs"));
 const jwt = __importStar(require("jsonwebtoken"));
 const auth_1 = require("../middlewares/auth");
 class UsersController {
@@ -53,7 +53,11 @@ class UsersController {
             console.error('get error:', err);
             return null;
         });
-        res.json({ success: !!user, data: user });
+        if (!user) {
+            res.json({ success: false, message: 'User could not be found.' });
+            return;
+        }
+        res.json({ success: true, data: user });
     }
     ;
     async createUser(req, res) {
@@ -67,7 +71,9 @@ class UsersController {
             res.json({ success: false, message: 'A user with this username already exists.' });
             return;
         }
+        console.log('No user found! Creating new...');
         const encryptedPwd = await bcrypt.hash(userData.password, 6);
+        console.log('Encrypted pw:', encryptedPwd);
         const user = await database_1.mysqlDt.getRepository(User_entity_1.User).save({ ...userData, password: encryptedPwd }).catch((err) => {
             console.error('Insert error:', err);
             return null;
@@ -100,11 +106,16 @@ class UsersController {
     }
     ;
     async loginUser(req, res) {
+        console.log('LOGIN REQUEST!');
         const userData = req.body;
         const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { username: userData.username } }).catch((err) => {
             console.error('get error:', err);
             return null;
         });
+        if (!user) {
+            res.json({ success: false, message: 'User could not be found.' });
+            return;
+        }
         if (user && (await bcrypt.compare(userData.password, user.password))) {
             // Create token
             const token = jwt.sign({ id: user.id, username: user.username }, "uth2022www", {
@@ -117,7 +128,7 @@ class UsersController {
             });
             return;
         }
-        res.json({ success: false });
+        res.json({ success: false, message: 'Authentication failed' });
     }
     ;
 }

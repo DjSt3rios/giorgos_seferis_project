@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import {Request, Response} from 'express';
 
 export const authUser = (req: Request, res: Response, next: Function) => {
-    const token: string = req.headers.accessToken as string;
+    const token: string = req.headers['access-token'] as string;
 
     if (!token) {
         return res.status(403).json({ success: false, message: "Authentication token not found" });

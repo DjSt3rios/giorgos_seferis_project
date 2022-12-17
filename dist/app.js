@@ -37,6 +37,13 @@ database_1.mysqlDt.initialize().then(() => {
 }).catch((error) => console.log("Could not connect to database!", error));
 exports.app = (0, express_1.default)();
 exports.app.use(body_parser_1.default.json());
+exports.app.use(function (req, res, next) {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE");
+    res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Origin,Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers,Authorization, access-token");
+    next();
+});
 const books_1 = require("./controllers/books");
 const links_1 = require("./controllers/links");
 const user_1 = require("./controllers/user");

@@ -3,6 +3,8 @@
         "module": "ES2022",
         "target": "ES2022",
         "moduleResolution": "Node16",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "sourceMap": true,
         "paths": {
             "*": [
@@ -10,6 +12,7 @@
             ]
         }
     },
+    "files": ["main.ts", "cookies.ts", "models/book.model.ts", "models/link.model.ts", "models/user.model.ts"],
     "exclude": [
         "../../node_modules/**"
     ]

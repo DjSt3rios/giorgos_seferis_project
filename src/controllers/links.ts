@@ -65,4 +65,17 @@ export class LinksController {
         });
         res.json({ success: !!link });
     };
+
+    @ControllerRoute({
+        method: METHOD.POST,
+        path: '/api/links/search',
+    }) async searchLink(req: Request, res: Response): Promise<void> {
+        const linkData: LinkModel = req.body;
+        const link = await mysqlDt.getRepository(Link).find({ where: linkData }).catch((err) => {
+            console.error('search error:', err);
+            return null;
+        });
+        res.json({ success: !!link, data: link });
+    };
+
 }

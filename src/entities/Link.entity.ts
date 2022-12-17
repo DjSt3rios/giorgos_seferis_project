@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
-import { LinkModel } from '../models/link.model';
+import { LinkCategoryEnum, LinkModel } from '../models/link.model';
 
-@Entity()
+@Entity({ name: 'links'})
 export class Link implements LinkModel {
     @PrimaryGeneratedColumn()
     id: number
@@ -10,6 +10,8 @@ export class Link implements LinkModel {
 
     @Column()
     link: string;
+    @Column()
+    category: LinkCategoryEnum;
 
 
 

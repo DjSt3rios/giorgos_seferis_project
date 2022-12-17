@@ -3,7 +3,7 @@ import { ControllerRoute, METHOD } from '../routes/routes';
 import { mysqlDt } from '../database';
 import { User } from '../entities/User.entity';
 import { UserModel } from '../models/user.model';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { authUser } from '../middlewares/auth';
 
@@ -27,7 +27,11 @@ export class UsersController {
             console.error('get error:', err);
             return null;
         });
-        res.json({ success: !!user, data: user });
+        if (!user) {
+            res.json({ success: false, message: 'User could not be found.' });
+            return;
+        }
+        res.json({ success: true, data: user });
     };
 
     @ControllerRoute({
@@ -44,7 +48,9 @@ export class UsersController {
             res.json({ success: false, message: 'A user with this username already exists.' });
             return;
         }
+        console.log('No user found! Creating new...');
         const encryptedPwd = await bcrypt.hash(userData.password, 6);
+        console.log('Encrypted pw:', encryptedPwd);
         const user = await mysqlDt.getRepository(User).save({ ...userData, password: encryptedPwd }).catch((err) => {
             console.error('Insert error:', err);
             return null;
@@ -92,11 +98,16 @@ export class UsersController {
         method: METHOD.POST,
         path: '/api/users/login'
     }) async loginUser(req: Request, res: Response): Promise<void> {
+        console.log('LOGIN REQUEST!');
         const userData: UserModel = req.body;
         const user = await mysqlDt.getRepository(User).findOne({ where: { username: userData.username }}).catch((err) => {
             console.error('get error:', err);
             return null;
         });
+        if (!user) {
+            res.json({ success: false, message: 'User could not be found.' });
+            return;
+        }
         if (user && (await bcrypt.compare(userData.password, user.password))) {
             // Create token
             const token = jwt.sign(
@@ -113,6 +124,6 @@ export class UsersController {
             });
             return;
         }
-        res.json({ success: false });
+        res.json({ success: false, message: 'Authentication failed' });
     };
 }

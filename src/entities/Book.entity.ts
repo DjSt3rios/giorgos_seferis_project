@@ -1,5 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm"
-import { BookModel } from '../models/book.model';
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm"
+import { BookCategoryEnum, BookModel } from '../models/book.model';
 
 @Entity({ name: 'books' })
 export class Book implements BookModel {
@@ -11,5 +11,8 @@ export class Book implements BookModel {
 
     @Column()
     year: number;
+
+    @Column()
+    category: BookCategoryEnum;
 
 }

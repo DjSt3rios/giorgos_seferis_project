@@ -57,6 +57,15 @@ class BooksController {
         res.json({ success: !!book });
     }
     ;
+    async searchBook(req, res) {
+        const bookData = req.body;
+        const book = await database_1.mysqlDt.getRepository(Book_entity_1.Book).find({ where: bookData }).catch((err) => {
+            console.error('search error:', err);
+            return null;
+        });
+        res.json({ success: !!book, data: book });
+    }
+    ;
 }
 __decorate([
     (0, routes_1.ControllerRoute)({
@@ -106,5 +115,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], BooksController.prototype, "updateBook", null);
+__decorate([
+    (0, routes_1.ControllerRoute)({
+        method: routes_1.METHOD.POST,
+        path: '/api/books/search',
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], BooksController.prototype, "searchBook", null);
 exports.BooksController = BooksController;
 //# sourceMappingURL=books.js.map
