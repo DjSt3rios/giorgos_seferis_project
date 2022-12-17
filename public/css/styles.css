@@ -1,0 +1,118 @@
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.d-none {
+  display: none;
+}
+
+.gap-30 {
+  gap: 30px;
+}
+
+body {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "nav nav"
+    "aside main"
+    "footer footer";
+  grid-template-columns: 250px auto;
+  grid-template-rows: 50px 50px calc(100vh - 126px) 26px;
+  margin: 0 !important;
+}
+
+footer {
+  grid-area: footer;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  background-color: #00305b;
+  color: white;
+  font-weight: 600;
+  font-size: 22px;
+  text-align: center;
+}
+
+nav {
+  grid-area: nav;
+  width: 100%;
+  background-color: #037bf4;
+  color: white;
+  font-size: 18px;
+  padding: 5px 0;
+}
+
+nav > ul {
+  list-style-type: none;
+  margin: 0;
+  float: right;
+}
+
+nav li {
+  display: inline;
+  padding: 10px;
+}
+
+nav li a {
+  cursor: pointer;
+  transition: all ease 0.2s;
+}
+
+nav li a:hover {
+  color: #d5d5d5;
+  text-decoration: underline #000000;
+  text-underline-offset: 5px;
+}
+
+.nav-item {
+
+}
+
+.aside {
+  grid-area: aside;
+  background-color: darkgoldenrod;
+  color: white;
+  height: 100%;
+}
+
+header {
+  width: 100%;
+  grid-area: header;
+  background-color: #037bf4;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.header-text {
+  padding: 5px;
+}
+
+main {
+  grid-area: main;
+  font-size: 20px;
+}
+
+.p-20 {
+  padding: 20px;
+}
+
+.side-menu-item {
+  padding: 10px;
+  cursor: pointer;
+}
+
+#Bio {
+  background-color: #c8c8c8;
+}
+
+section {
+  height: 100%;
+  overflow: auto;
+}
