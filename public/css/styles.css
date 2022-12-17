@@ -10,6 +10,10 @@
   display: none;
 }
 
+.d-inline {
+  display: inline;
+}
+
 .gap-30 {
   gap: 30px;
 }
@@ -115,4 +119,42 @@ main {
 section {
   height: 100%;
   overflow: auto;
+}
+
+form {
+  padding: 20px;
+  background-color: #a4a4a4;
+  border: 2px solid black;
+  min-width: 150px;
+  max-width: 300px;
+  margin: auto;
+  justify-content: center;
+}
+
+#loginForm input {
+  min-width: 100px;
+  max-width: 250px;
+  margin: auto;
+}
+
+#showRegister {
+  cursor: pointer;
+  color: #037bf4;
+}
+
+#no-account {
+  margin-top: 5px;
+  padding: 5px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.error {
+  font-weight: 600;
+  font-size: 20px;
+  color: red;
 }

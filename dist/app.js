@@ -29,23 +29,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.app = void 0;
 const body_parser_1 = __importDefault(require("body-parser"));
 const express_1 = __importDefault(require("express"));
-const morgan_1 = __importDefault(require("morgan"));
 const path = __importStar(require("path"));
 // Routes
-const routes_1 = require("./routes");
-const books_1 = require("./routes/books");
-const links_1 = require("./routes/links");
-const user_1 = require("./routes/user");
-const errorHandler_1 = require("./middlewares/errorHandler");
+const database_1 = require("./database");
+database_1.mysqlDt.initialize().then(() => {
+    console.log("Database connection established.");
+}).catch((error) => console.log("Could not connect to database!", error));
 exports.app = (0, express_1.default)();
 exports.app.use(body_parser_1.default.json());
+const books_1 = require("./controllers/books");
+const links_1 = require("./controllers/links");
+const user_1 = require("./controllers/user");
+const error_1 = require("./middlewares/error");
 // Express configuration
 exports.app.set("port", process.env.PORT || 3000);
-exports.app.use((0, morgan_1.default)("dev"));
 exports.app.use(express_1.default.static(path.join(__dirname, "../public")));
-exports.app.use("/", routes_1.index);
-exports.app.use("/api/books", books_1.books);
-exports.app.use("/api/links", links_1.links);
-exports.app.use("/api/user", user_1.user);
-exports.app.use(errorHandler_1.notFoundHandler);
+new books_1.BooksController();
+new links_1.LinksController();
+new user_1.UsersController();
+exports.app.use(error_1.notFoundHandler);
 //# sourceMappingURL=app.js.map

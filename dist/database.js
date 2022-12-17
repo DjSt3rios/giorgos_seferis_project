@@ -1,34 +1,19 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pool = void 0;
-const mysql = __importStar(require("mysql"));
-exports.pool = mysql.createPool({
-    host: '127.0.0.1',
-    user: 'root',
-    password: 'sterios',
-    database: 'seferis'
+exports.mysqlDt = void 0;
+const typeorm_1 = require("typeorm");
+const Book_entity_1 = require("./entities/Book.entity");
+const Link_entity_1 = require("./entities/Link.entity");
+const User_entity_1 = require("./entities/User.entity");
+exports.mysqlDt = new typeorm_1.DataSource({
+    type: "mysql",
+    host: "127.0.0.1",
+    port: 3306,
+    username: "root",
+    password: "sterios",
+    database: "seferis",
+    entities: [Book_entity_1.Book, Link_entity_1.Link, User_entity_1.User],
+    logging: true,
+    synchronize: false,
 });
 //# sourceMappingURL=database.js.map

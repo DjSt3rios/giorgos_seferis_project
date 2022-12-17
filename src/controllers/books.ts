@@ -1,76 +1,68 @@
 import { Request, Response } from 'express';
-import { pool } from '../database';
-import { OkPacket } from 'mysql';
 import { BookModel } from '../models/book.model';
+import { ControllerRoute, METHOD } from '../routes/routes';
+import { mysqlDt } from '../database';
+import { Book } from '../entities/Book.entity';
+import { authUser } from '../middlewares/auth';
 
-export const allBooks = async (req: Request, res: Response): Promise<void> => {
-    pool.query('SELECT * FROM books', (errorHandler,  rows) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
-            data: rows
+export class BooksController {
+    @ControllerRoute({
+        method: METHOD.GET,
+        path: '/api/books/all',
+    }) async getAllBooks(req: Request, res: Response): Promise<void> {
+        const books = await mysqlDt.getRepository(Book).find().catch((err) => {
+            console.error('get all error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!books, data: books });
+    };
 
-export const addBook = async (req: Request, res: Response): Promise<void> => {
-    const body: BookModel = req.body;
-    pool.query(`INSERT INTO books(title, year) VALUES ("${body.title}", ${body.year})`, (errorHandler,  packet: OkPacket) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
-            id: packet.insertId
+    @ControllerRoute({
+        method: METHOD.GET,
+        path: '/api/books/:id',
+    }) async getBook(req: Request, res: Response): Promise<void> {
+        const book = await mysqlDt.getRepository(Book).findOne({ where: { id: +req.params.id }}).catch((err) => {
+            console.error('get error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!book, data: book });
+    };
 
-export const deleteBook = async (req: Request, res: Response): Promise<void> => {
-    pool.query(`DELETE FROM books WHERE id=${req.params.id}`, (errorHandler,  packet: OkPacket) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
+    @ControllerRoute({
+        method: METHOD.POST,
+        path: '/api/books/new',
+        authMiddleware: authUser,
+    }) async createBook(req: Request, res: Response): Promise<void> {
+        const bookData: BookModel = req.body;
+        const book = await mysqlDt.getRepository(Book).insert(bookData).catch((err) => {
+            console.error('Insert error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!book });
+    };
 
-export const getBook = async (req: Request, res: Response): Promise<void> => {
-    pool.query(`SELECT * FROM books WHERE id=${req.params.id}`, (errorHandler,  packet: any[]) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        console.log(packet);
-        return res.json({
-            success: true,
-            data: packet[0]
+    @ControllerRoute({
+        method: METHOD.DELETE,
+        path: '/api/books/:id',
+        authMiddleware: authUser,
+    }) async deleteBook(req: Request, res: Response): Promise<void> {
+        const book = await mysqlDt.getRepository(Book).delete(req.params.id).catch((err) => {
+            console.error('delete error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!book });
+    };
 
-export const updateBook = async (req: Request, res: Response): Promise<void> => {
-    const body: BookModel = req.body;
-    pool.query(`UPDATE books SET title="${body.title}", year=${body.year} WHERE id=${req.params.id}`, (errorHandler,  packet: OkPacket) => {
-        if (errorHandler) {
-            console.log(errorHandler);
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
+    @ControllerRoute({
+        method: METHOD.PATCH,
+        path: '/api/books/:id',
+        authMiddleware: authUser,
+    }) async updateBook(req: Request, res: Response): Promise<void> {
+        const bookData: BookModel = req.body;
+        const book = await mysqlDt.getRepository(Book).update(req.params.id, bookData).catch((err) => {
+            console.error('update error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!book });
+    };
+}

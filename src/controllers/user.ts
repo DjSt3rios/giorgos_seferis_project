@@ -1,76 +1,118 @@
 import { Request, Response } from 'express';
-import { pool } from '../database';
-import { OkPacket } from 'mysql';
+import { ControllerRoute, METHOD } from '../routes/routes';
+import { mysqlDt } from '../database';
+import { User } from '../entities/User.entity';
 import { UserModel } from '../models/user.model';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
+import { authUser } from '../middlewares/auth';
 
-export const allUsers = async (req: Request, res: Response): Promise<void> => {
-    pool.query('SELECT * FROM users', (errorHandler,  rows) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
-            data: rows
+export class UsersController {
+    @ControllerRoute({
+        method: METHOD.GET,
+        path: '/api/users/all'
+    }) async getAllUsers(req: Request, res: Response): Promise<void> {
+        const users = await mysqlDt.getRepository(User).find().catch((err) => {
+            console.error('get all error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!users, data: users });
+    };
 
-export const addUser = async (req: Request, res: Response): Promise<void> => {
-    const body: UserModel = req.body;
-    pool.query(`INSERT INTO users(username, password, is_admin) VALUES ("${body.username}", "${body.password}", ${body.is_admin ? 1 : 0})`, (errorHandler,  packet: OkPacket) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
-            id: packet.insertId
+    @ControllerRoute({
+        method: METHOD.GET,
+        path: '/api/users/:id'
+    }) async getUser(req: Request, res: Response): Promise<void> {
+        const user = await mysqlDt.getRepository(User).findOne({ where: { id: +req.params.id }}).catch((err) => {
+            console.error('get error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!user, data: user });
+    };
 
-export const deleteUser = async (req: Request, res: Response): Promise<void> => {
-    pool.query(`DELETE FROM users WHERE id=${req.params.id}`, (errorHandler,  packet: OkPacket) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
+    @ControllerRoute({
+        method: METHOD.POST,
+        path: '/api/users/new'
+    }) async createUser(req: Request, res: Response): Promise<void> {
+        const userData: UserModel = req.body;
+        const existingUser = await mysqlDt.getRepository(User).findOne({
+            where: {
+                username: userData.username
+            }
         });
-    });
-};
+        if (existingUser) {
+            res.json({ success: false, message: 'A user with this username already exists.' });
+            return;
+        }
+        const encryptedPwd = await bcrypt.hash(userData.password, 6);
+        const user = await mysqlDt.getRepository(User).save({ ...userData, password: encryptedPwd }).catch((err) => {
+            console.error('Insert error:', err);
+            return null;
+        });
+        if (user) {
+            const token = jwt.sign(
+                { id: user.id, username: user.username },
+                "uth2022www",
+                {
+                    expiresIn: "1y",
+                }
+            );
+            res.json({ success: !!user, accessToken: token });
+            return;
+        }
+        res.json({ success: false });
+    };
 
-export const getUser = async (req: Request, res: Response): Promise<void> => {
-    pool.query(`SELECT * FROM users WHERE id=${req.params.id}`, (errorHandler,  packet: any[]) => {
-        if (errorHandler) {
-            return res.json({
-                success: false
-            });
-        }
-        console.log(packet);
-        return res.json({
-            success: true,
-            data: packet[0]
+    @ControllerRoute({
+        method: METHOD.DELETE,
+        path: '/api/users/:id',
+        authMiddleware: authUser,
+    }) async deleteUser(req: Request, res: Response): Promise<void> {
+        const user = await mysqlDt.getRepository(User).delete(req.params.id).catch((err) => {
+            console.error('delete error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!user });
+    };
 
-export const updateUser = async (req: Request, res: Response): Promise<void> => {
-    const body: UserModel = req.body;
-    pool.query(`UPDATE users SET username="${body.username}", password=${body.password}, is_admin=${body.is_admin ? 1 : 0} WHERE id=${req.params.id}`, (errorHandler,  packet: OkPacket) => {
-        if (errorHandler) {
-            console.log(errorHandler);
-            return res.json({
-                success: false
-            });
-        }
-        return res.json({
-            success: true,
+    @ControllerRoute({
+        method: METHOD.PATCH,
+        path: '/api/users/:id',
+        authMiddleware: authUser,
+    }) async updateUser(req: Request, res: Response): Promise<void> {
+        const userData: UserModel = req.body;
+        const user = await mysqlDt.getRepository(User).update(req.params.id, userData).catch((err) => {
+            console.error('update error:', err);
+            return null;
         });
-    });
-};
+        res.json({ success: !!user });
+    };
+
+    @ControllerRoute({
+        method: METHOD.POST,
+        path: '/api/users/login'
+    }) async loginUser(req: Request, res: Response): Promise<void> {
+        const userData: UserModel = req.body;
+        const user = await mysqlDt.getRepository(User).findOne({ where: { username: userData.username }}).catch((err) => {
+            console.error('get error:', err);
+            return null;
+        });
+        if (user && (await bcrypt.compare(userData.password, user.password))) {
+            // Create token
+            const token = jwt.sign(
+                { id: user.id, username: user.username },
+                "uth2022www",
+                {
+                    expiresIn: "1y",
+                }
+            );
+            // user
+            res.json({
+                success: true,
+                accessToken: token,
+            });
+            return;
+        }
+        res.json({ success: false });
+    };
+}

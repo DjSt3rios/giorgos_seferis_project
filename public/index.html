@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="css/styles.css" rel="stylesheet">
-  <script src="js/main.js" async defer></script>
+  <script type="module" src="js/main.js" async defer></script>
   <title>Γιώργος Σεφέρης</title>
 </head>
 <body>
@@ -30,7 +30,8 @@
   <div class="side-menu-item" page="Links" id="links-ert">Αρχείο της ΕΡΤ</div>
   <div class="side-menu-item" page="Manage" id="manage-index">Διαχείριση</div>
   <div class="side-menu-item" page="Manage" id="manage-links">Διαχείριση συνδέσμων</div>
-  <div class="side-menu-item" page="Manage" id="manage-books">Διαχείριση συνδέσμων</div>
+  <div class="side-menu-item" page="Manage" id="manage-books">Διαχείριση Βιβλίων</div>
+  <div class="side-menu-item" page="Manage" id="manage-login">Σύνδεση</div>
 </div>
 <main>
   <section id="Bio">
@@ -99,8 +100,28 @@
     <div subcategory="links" class="p-20 d-none">
 
     </div>
-    <div subcategory="login" class="p-20 d-none">
-
+    <div subcategory="login" class="p-20 d-none flex flex-column text-center">
+        <form id="loginForm" class="flex flex-column">
+          <label>Username</label>
+          <input type="text" id="loginUsername">
+          <label>Password</label>
+          <input type="password" id="loginPassword">
+          <button type="button" id="loginButton">Login</button>
+          <div id="loginError" class="d-none error"></div>
+        </form>
+        <div id="no-account" class="d-inline">No account? <div id="showRegister" class="d-inline">Click here to create one!</div></div>
+    </div>
+    <div subcategory="register" class="p-20 d-none">
+      <form id="registerForm" class="flex flex-column">
+        <label>Username</label>
+        <input type="text" id="registerUsername">
+        <label>Password</label>
+        <input type="password" id="registerPassword">
+        <label>Repeat Password</label>
+        <input type="password" id="registerRepeatPassword">
+        <button type="button" id="registerButton">Register</button>
+        <div id="registerError" class="d-none error"></div>
+      </form>
     </div>
   </section>
 </main>

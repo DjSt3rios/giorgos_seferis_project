@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.server = void 0;
 const app_1 = require("./app");
 const port = app_1.app.get("port");
-const server = app_1.app.listen(port, onListening);
-server.on("error", onError);
+exports.server = app_1.app.listen(port, onListening);
+exports.server.on("error", onError);
 function onError(error) {
     if (error.syscall !== "listen") {
         throw error;
@@ -23,7 +24,7 @@ function onError(error) {
     }
 }
 function onListening() {
-    const addr = server.address();
+    const addr = exports.server.address();
     const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr.port}`;
     console.log(`Listening on ${bind}`);
 }
