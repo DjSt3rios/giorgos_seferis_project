@@ -44,6 +44,9 @@ const bookListMyth = document.getElementById('bookListMyth') as HTMLElement;
 const bookListDok = document.getElementById('bookListDok') as HTMLElement;
 const bookListManage = document.getElementById('bookListM') as HTMLElement;
 const linksWithData: HTMLElement[] = [linkListGeneral, linkListErt, linkListManage, bookListGeneral, bookListMyth, bookListDok, bookListManage];
+const overlay = document.getElementById('overlay');
+const bookData: { [id: number]: BookModel } = {};
+const linkData: { [id: number]: LinkModel } = {};
 
 function setButtonLoadingStatus(button: HTMLElement, loading = true)
 {
@@ -137,6 +140,92 @@ function addEvents() {
   document.getElementById('goManageLinks')?.addEventListener('click', () => {
     changeSubcategory('links');
   });
+  overlay.addEventListener('click', (evt) => {
+    if (evt.target === overlay) {
+      closeModal();
+    }
+  });
+  document.getElementById('newBook')?.addEventListener('click', () => {
+    editBook();
+  });
+  document.getElementById('newLink')?.addEventListener('click', () => {
+    editLink();
+  });
+}
+
+function closeModal() {
+  overlay.classList.add('d-none');
+  overlay.innerHTML = "";
+}
+
+function openModal() {
+  overlay.classList.remove('d-none');
+}
+
+function editBook(bookId?: number) {
+  const frag = document.createRange().createContextualFragment(document.getElementById('editBookModalTemplate').innerHTML);
+  if(bookId) {
+    const bookIdInput = frag.querySelector('#bookId') as HTMLInputElement;
+    bookIdInput.value = String(bookId);
+    const bookTitleInput = frag.querySelector('#bookTitle') as HTMLInputElement;
+    bookTitleInput.value = bookData[bookId]?.title;
+    const bookYearInput = frag.querySelector('#bookYear') as HTMLInputElement;
+    bookYearInput.value = String(bookData[bookId]?.year);
+    const bookYearType = frag.querySelector('#bookType') as HTMLSelectElement;
+    bookYearType.value = String(bookData[bookId]?.category).toUpperCase();
+  }
+  overlay.appendChild(frag);
+  overlay.querySelector('#saveButton').addEventListener('click', () => {
+    const id = overlay.querySelector('#bookId') as HTMLInputElement;
+    const titleInput = overlay.querySelector('#bookTitle') as HTMLInputElement;
+    const yearInput = overlay.querySelector('#bookYear') as HTMLInputElement;
+    const yearType = overlay.querySelector('#bookType') as HTMLSelectElement;
+    if (!titleInput.value.length || !yearInput.value.length) {
+      setSaveError('Please fill all fields.');
+      return;
+    }
+    setSaveError();
+    saveBook({
+      id: id.value.length ? +id.value : undefined,
+      title: titleInput.value,
+      year: +yearInput.value,
+      category: yearType.value === 'DOK' ? BookCategoryEnum.DOK : BookCategoryEnum.MYTH,
+    }).then();
+  });
+  openModal();
+}
+
+function editLink(linkId?: number) {
+  const frag = document.createRange().createContextualFragment(document.getElementById('editLinkModalTemplate').innerHTML);
+  if(linkId) {
+    const linkIdInput = frag.querySelector('#linkId') as HTMLInputElement;
+    linkIdInput.value = String(linkId);
+    const linkLinkInput = frag.querySelector('#linkLink') as HTMLInputElement;
+    linkLinkInput.value = linkData[linkId]?.link;
+    const linkAdditionalInfo = frag.querySelector('#linkAdditionalInfo') as HTMLInputElement;
+    linkAdditionalInfo.value = String(linkData[linkId]?.additionalInfo);
+    const linkCategoryInput = frag.querySelector('#linkType') as HTMLSelectElement;
+    linkCategoryInput.value = String(linkData[linkId]?.category).toUpperCase();
+  }
+  overlay.appendChild(frag);
+  overlay.querySelector('#saveButton').addEventListener('click', () => {
+    const id = overlay.querySelector('#linkId') as HTMLInputElement;
+    const linkInput = overlay.querySelector('#linkLink') as HTMLInputElement;
+    const additionalInfoInput = overlay.querySelector('#linkAdditionalInfo') as HTMLInputElement;
+    const linkType = overlay.querySelector('#linkType') as HTMLSelectElement;
+    if (!linkInput.value.length) {
+      setSaveError('Link field is required.');
+      return;
+    }
+    setSaveError();
+    saveLink({
+      id: id.value.length ? +id.value : undefined,
+      link: linkInput.value,
+      additionalInfo: additionalInfoInput.value,
+      category: linkType.value === 'GENERAL' ? LinkCategoryEnum.GENERAL : LinkCategoryEnum.ERT,
+    }).then();
+  });
+  openModal();
 }
 
 async function onLoginClicked() {
@@ -153,7 +242,7 @@ async function onLoginClicked() {
     username: loginUsername?.value,
     password: loginPassword?.value,
   };
-  const result = JSON.parse(await fetchData('POST', baseAPIUrl + "users/login", data).catch((err) => { console.log(err); return null }));
+  const result = JSON.parse(await apiCall('POST', baseAPIUrl + "users/login", data).catch((err) => { console.log(err); return null }));
   setButtonLoadingStatus(loginButtonText, false);
   if (result?.success) {
     setLoginError();
@@ -192,7 +281,7 @@ async function onRegisterClicked() {
     username: registerUsername?.value,
     password: registerPassword?.value,
   };
-  const result = JSON.parse(await fetchData('post', baseAPIUrl + "users/new", data).catch(() => null));
+  const result = JSON.parse(await apiCall('post', baseAPIUrl + "users/new", data).catch(() => null));
   setButtonLoadingStatus(registerButtonText, false);
   if (result?.success) {
     setRegisterError();
@@ -232,7 +321,18 @@ function setLoginError(text?: string) {
   }
 }
 
-function fetchData(method: string, url: string, data: Record<string, any>): Promise<Record<any, any>> {
+function setSaveError(text?: string) {
+  const textElement = overlay.querySelector('#saveError') as HTMLElement;
+  if (text) {
+    textElement.innerText = text;
+    textElement.classList.remove('d-none');
+  } else {
+    textElement.innerText = "";
+    textElement.classList.add('d-none');
+  }
+}
+
+function apiCall(method: string, url: string, data: Record<string, any>): Promise<Record<any, any>> {
   return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();
     xhr.open(method, url);
@@ -257,7 +357,7 @@ function fetchData(method: string, url: string, data: Record<string, any>): Prom
         statusText: xhr.statusText
       });
     };
-    if (method.toLowerCase() === 'post') {
+    if (method.toLowerCase() === 'post' || method.toLowerCase() === 'patch') {
       if (Object.keys(data).length) {
         xhr.send(JSON.stringify(data));
       } else {
@@ -287,21 +387,45 @@ function changeSubcategory(subcategory: string) {
 }
 
 async function deleteBook(id: number) {
-  const result = await fetchData("DELETE",baseAPIUrl + `books/${id}`, {});
+  const result = await apiCall("DELETE",baseAPIUrl + `books/${id}`, {});
   console.log('Delete result:', result);
 }
 
 async function deleteLink(id: number) {
-  const result = await fetchData("DELETE",baseAPIUrl + `links/${id}`, {});
+  const result = await apiCall("DELETE",baseAPIUrl + `links/${id}`, {});
   console.log('Delete result:', result);
 }
 
-function addBook(bookData: BookModel) {
-
+async function saveBook(bookData: BookModel) {
+  setButtonLoadingStatus(overlay.querySelector('#saveButton'), true);
+  const result = JSON.parse(await apiCall(bookData.id ? 'PATCH' : 'POST', baseAPIUrl + `books/${bookData?.id ? bookData.id.toString() : 'new'}`, bookData).catch(() => null));
+  if (result?.success) {
+    closeModal();
+    updateMainContent();
+  } else {
+    setButtonLoadingStatus(overlay.querySelector('#saveButton'), false);
+    if (result?.message) {
+      setSaveError(result.message);
+    } else {
+      setSaveError('An unknown error has occurred. Please try again.');
+    }
+  }
 }
 
-function addLink(linkData: LinkModel) {
-
+async function saveLink(linkData: LinkModel) {
+  setButtonLoadingStatus(overlay.querySelector('#saveButton'), true);
+  const result = JSON.parse(await apiCall(linkData.id ? 'PATCH' : 'POST', baseAPIUrl + `links/${linkData?.id ? linkData.id.toString() : 'new'}`, linkData).catch(() => null));
+  if (result?.success) {
+    closeModal();
+    updateMainContent();
+  } else {
+    setButtonLoadingStatus(overlay.querySelector('#saveButton'), false);
+    if (result?.message) {
+      setSaveError(result.message);
+    } else {
+      setSaveError('An unknown error has occurred. Please try again.');
+    }
+  }
 }
 
 function updateMainContent() {
@@ -335,7 +459,7 @@ function updateMainContent() {
           getBooks().then((results: { data: BookModel[] }) => {
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              bookListGeneral.insertAdjacentHTML('beforeend', `<div class="book-item">${result.title} (${result.year})</div>`);
+              bookListGeneral.insertAdjacentHTML('beforeend', `<div class="book-item mt-3">${result.title} (${result.year})</div>`);
             }
           });
           break;
@@ -343,7 +467,7 @@ function updateMainContent() {
           getBooks({ category: BookCategoryEnum.DOK }).then((results: { data: BookModel[] }) => {
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              bookListDok.insertAdjacentHTML('beforeend', `<div class="book-item">${result.title} (${result.year})</div>`);
+              bookListDok.insertAdjacentHTML('beforeend', `<div class="book-item mt-3">${result.title} (${result.year})</div>`);
             }
           });
           break;
@@ -351,7 +475,7 @@ function updateMainContent() {
           getBooks({ category: BookCategoryEnum.MYTH }).then((results: { data: BookModel[] }) => {
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              bookListMyth.insertAdjacentHTML('beforeend', `<div class="book-item">${result.title} (${result.year})</div>`);
+              bookListMyth.insertAdjacentHTML('beforeend', `<div class="book-item mt-3">${result.title} (${result.year})</div>`);
             }
           });
           break;
@@ -369,7 +493,7 @@ function updateMainContent() {
           getLinks().then((results: { data: LinkModel[] }) => {
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              linkListGeneral.insertAdjacentHTML('beforeend', `<div class="link-item"><a href="${result.link}">${result.link}</a> (${result.additionalInfo})</div>`);
+              linkListGeneral.insertAdjacentHTML('beforeend', `<div class="link-item mt-3"><a href="${result.link}">${result.link}</a> (${result.additionalInfo})</div>`);
             }
           });
           break;
@@ -377,7 +501,7 @@ function updateMainContent() {
           getLinks({ category: LinkCategoryEnum.ERT }).then((results: { data: LinkModel[] }) => {
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              linkListErt.insertAdjacentHTML('beforeend', `<div class="link-item"><a href="${result.link}">${result.link}</a> (${result.additionalInfo})</div>`);
+              linkListErt.insertAdjacentHTML('beforeend', `<div class="link-item mt-3"><a href="${result.link}">${result.link}</a> (${result.additionalInfo})</div>`);
             }
           });
           break;
@@ -390,29 +514,42 @@ function updateMainContent() {
       switch(category) {
         case 'books':
           getBooks().then((results: { data: BookModel[] }) => {
+            clearObject(bookData);
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              bookListManage.insertAdjacentHTML('beforeend', `<div class="link-item">${result.title} (${result.year}) <button id="book${result.id}">Delete</button></div>`);
-              const button = bookListManage.querySelector(`#book${result.id}`);
-              button.addEventListener('click', () => {
+              bookData[result.id] = result;
+              bookListManage.insertAdjacentHTML('beforeend', `<div class="link-item mt-3">${result.title} (${result.year}) <button class="btn" id="editbook${result.id}">Edit</button> <button class="btn" id="book${result.id}">Delete</button> </div>`);
+              const deleteButton = bookListManage.querySelector(`#book${result.id}`);
+              deleteButton.addEventListener('click', () => {
                 deleteBook(result.id).then(() => {
-                  button.parentElement.remove();
+                  deleteButton.parentElement.remove();
+                  delete bookData[result.id];
                 });
-              })
+              });
+              const editButton = bookListManage.querySelector(`#editbook${result.id}`);
+              editButton.addEventListener('click', () => {
+                editBook(result.id);
+              });
             }
           });
           break;
         case 'links':
           getLinks().then((results: { data: LinkModel[] }) => {
+            clearObject(linkData);
             results = JSON.parse(results as unknown as string);
             for (const result of results?.data) {
-              linkListManage.insertAdjacentHTML('beforeend', `<div class="link-item"><a href="${result.link}">${result.link}</a> (${result.additionalInfo}) <button id="link${result.id}">Delete</button></div>`);
-              const button = linkListManage.querySelector(`#link${result.id}`);
-              button.addEventListener('click', () => {
+              linkData[result.id] = result;
+              linkListManage.insertAdjacentHTML('beforeend', `<div class="link-item mt-3"><a href="${result.link}">${result.link}</a> (${result.additionalInfo}) <button class="btn" id="editlink${result.id}">Edit</button> <button class="btn" id="link${result.id}">Delete</button> </div>`);
+              const deleteButton = linkListManage.querySelector(`#link${result.id}`);
+              deleteButton.addEventListener('click', () => {
                 deleteLink(result.id).then(() => {
-                  button.parentElement.remove();
+                  deleteButton.parentElement.remove();
                 });
-              })
+              });
+              const editButton = linkListManage.querySelector(`#editlink${result.id}`);
+              editButton.addEventListener('click', () => {
+                editLink(result.id);
+              });
             }
           });
           break;
@@ -426,12 +563,20 @@ function updateMainContent() {
   element?.classList.remove('d-none');
 }
 
+function clearObject(object: Record<any, any>) {
+  if(object && typeof object === 'object') {
+    for (const objectKey in object) {
+      delete object[objectKey];
+    }
+  }
+}
+
 async function getBooks(filter: BookModel = {} as BookModel) {
-  return await fetchData("POST",baseAPIUrl + `books/search`, filter);
+  return await apiCall("POST",baseAPIUrl + `books/search`, filter);
 }
 
 async function getLinks(filter: LinkModel = {} as LinkModel) {
-  return await fetchData("POST",baseAPIUrl + `links/search`, filter);
+  return await apiCall("POST",baseAPIUrl + `links/search`, filter);
 }
 
 function onInit()

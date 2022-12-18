@@ -59,6 +59,8 @@ export class BooksController {
         authMiddleware: authUser,
     }) async updateBook(req: Request, res: Response): Promise<void> {
         const bookData: BookModel = req.body;
+        console.log('Updating', req.params.id);
+        console.log('Data:', bookData);
         const book = await mysqlDt.getRepository(Book).update(req.params.id, bookData).catch((err) => {
             console.error('update error:', err);
             return null;

@@ -23,10 +23,10 @@
   <div class="side-menu-item" page="Bio" id="bio-metabash">Η μετάβαση στην Αφρική και τη Μέση Ανατολή</div>
   <div class="side-menu-item" page="Photos" id="photos-index">Γενικές φωτογραφίες</div>
   <div class="side-menu-item" page="Photos" id="photos-old">Φωτογραφίες ως νέος</div>
-  <div class="side-menu-item" page="Books" id="books-index">Ποιητικές συλλογές</div>
+  <div class="side-menu-item" page="Books" id="books-index">Όλα τα βιβλία</div>
   <div class="side-menu-item" page="Books" id="books-myth">Μυθιστορήματα</div>
   <div class="side-menu-item" page="Books" id="books-dok">Δοκίμια</div>
-  <div class="side-menu-item" page="Links" id="links-index">Μεταφράσεις</div>
+  <div class="side-menu-item" page="Links" id="links-index">Γενικοί σύνδεσμοι</div>
   <div class="side-menu-item" page="Links" id="links-ert">Αρχείο της ΕΡΤ</div>
   <div class="side-menu-item" page="Manage" id="manage-index">Διαχείριση</div>
   <div class="side-menu-item" page="Manage" id="manage-links">Διαχείριση συνδέσμων</div>
@@ -121,6 +121,7 @@
       <div class="flex flex-column">
         <div>Καταχωρημένα βιβλία:</div>
         <div class="flex flex-column" id="bookListM"></div>
+        <button class="btn mt-5" id="newBook">Προσθήκη βιβλίου</button>
       </div>
 
     </div>
@@ -128,10 +129,11 @@
       <div class="flex flex-column">
         <div>Καταχωρημένοι σύνδεσμοι:</div>
         <div class="flex flex-column" id="linkListM"></div>
+        <button class="btn mt-5" id="newLink">Προσθήκη Συνδέσμου</button>
       </div>
     </div>
     <div subcategory="login" class="p-20 d-none flex flex-column text-center">
-        <form id="loginForm" class="flex flex-column">
+        <form id="loginForm" class="flex flex-column auth-form">
           <label>Username</label>
           <input type="text" id="loginUsername">
           <label>Password</label>
@@ -142,7 +144,7 @@
         <div id="no-account" class="d-inline">No account? <div id="showRegister" class="d-inline">Click here to create one!</div></div>
     </div>
     <div subcategory="register" class="p-20 d-none">
-      <form id="registerForm" class="flex flex-column">
+      <form id="registerForm" class="flex flex-column auth-form">
         <label>Username</label>
         <input type="text" id="registerUsername">
         <label>Password</label>
@@ -157,4 +159,44 @@
 </main>
 <footer>Thank you for reading!</footer>
 </body>
+<div class="d-none overlay-bg" id="overlay">
+
+</div>
 </html>
+<template id="editBookModalTemplate">
+  <div class="modal">
+    <form class="flex flex-column edit-form">
+      <input hidden="hidden" id="bookId"/>
+      <label>Τίτλος</label>
+      <input type="text" id="bookTitle" class="mt-2">
+      <label class="mt-2">Χρονολογία έκδοσης</label>
+      <input class="mt-2" type="number" id="bookYear">
+      <label class="mt-2">Τύπος βιβλίου</label>
+      <select class="mt-2" id="bookType">
+        <option default value="DOK">Δοκίμιο</option>
+        <option value="MYTH">Μυθιστόρημα</option>
+      </select>
+      <button type="button" id="saveButton" class="btn mt-3"><div class="loading d-none"></div><span id="saveButtonText">Save</span></button>
+      <div id="saveError" class="d-none error mt-2"></div>
+    </form>
+  </div>
+</template>
+
+<template id="editLinkModalTemplate">
+  <div class="modal">
+    <form class="flex flex-column edit-form">
+      <input hidden="hidden" id="linkId"/>
+      <label>Σύνδεσμος</label>
+      <input type="text" id="linkLink" class="mt-2">
+      <label class="mt-2">Επιπλέον πληροφορίες</label>
+      <input class="mt-2" type="text" id="linkAdditionalInfo">
+      <label class="mt-2">Τύπος Συνδέσμου</label>
+      <select class="mt-2" id="linkType">
+        <option default value="GENERAL">Γενική</option>
+        <option value="ERT">ΕΡΤ</option>
+      </select>
+      <button type="button" id="saveButton" class="btn mt-3"><div class="loading d-none"></div><span id="saveButtonText">Save</span></button>
+      <div id="saveError" class="d-none error mt-2"></div>
+    </form>
+  </div>
+</template>

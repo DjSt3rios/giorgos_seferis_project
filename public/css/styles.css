@@ -30,6 +30,30 @@
   gap: 30px;
 }
 
+.mt-1 {
+  margin-top: 2px;
+}
+
+.mt-2 {
+  margin-top: 5px;
+}
+
+.mt-3 {
+  margin-top: 10px;
+}
+
+.mt-4 {
+  margin-top: 15px;
+}
+
+.mt-5 {
+  margin-top: 20px;
+}
+
+#newBook, #newLink {
+  max-width: 350px;
+}
+
 body {
   display: grid;
   grid-template-areas:
@@ -133,7 +157,7 @@ section {
   overflow: auto;
 }
 
-form {
+.auth-form {
   padding: 30px;
   background-color: #a4a4a4;
   border: 2px solid black;
@@ -142,6 +166,11 @@ form {
   width: 100%;
   margin: auto;
   justify-content: center;
+}
+
+.edit-form {
+  width: 100%;
+  height: 100%;
 }
 
 #loginForm input {
@@ -216,4 +245,28 @@ form {
   border-radius: 5px;
   background-color: #037bf4;
   color: white;
+  padding: 5px;
+}
+
+.overlay-bg {
+  background-color: rgba(0,0,0,0.4);
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.modal {
+  padding: 30px;
+  background-color: #aaaaaa;
+  border-radius: 12px;
+  width: 500px;
+  height: 250px;
+  z-index: 101;
+  position: absolute;
+  top: calc(50% - 200px);
+  left: calc(50% - 250px);
+  border: 2px solid black;
 }

@@ -50,6 +50,8 @@ class BooksController {
     ;
     async updateBook(req, res) {
         const bookData = req.body;
+        console.log('Updating', req.params.id);
+        console.log('Data:', bookData);
         const book = await database_1.mysqlDt.getRepository(Book_entity_1.Book).update(req.params.id, bookData).catch((err) => {
             console.error('update error:', err);
             return null;
