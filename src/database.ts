@@ -5,11 +5,11 @@ import { User } from './entities/User.entity';
 
 export const mysqlDt = new DataSource({
     type: "mysql",
-    host: "127.0.0.1",
+    host: "sql.freedb.tech",
     port: 3306,
-    username: "root",
-    password: "sterios",
-    database: "seferis",
+    username: "freedb_userg",
+    password: "Ya4dPd!Z9bB7jRP",
+    database: "freedb_g_seferis",
     entities: [Book, Link, User],
     logging: true,
     synchronize: false,
