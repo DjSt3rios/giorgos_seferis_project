@@ -63,7 +63,6 @@ function rebuildLeftNavigation() {
   const children = leftMenu.querySelectorAll('div[page]');
   children.forEach((child) => {
     if (currentPage === Pages.MANAGE) {
-      console.log('CHild:', child);
       if (child.getAttribute('page') === currentPage) {
         const subcategory = child.id.split('-')[1];
         if (subcategory === 'links' || subcategory === 'books')

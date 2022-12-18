@@ -14,5 +14,4 @@ export class Book implements BookModel {
 
     @Column()
     category: BookCategoryEnum;
-
 }

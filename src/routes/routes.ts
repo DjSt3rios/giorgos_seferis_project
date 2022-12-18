@@ -32,12 +32,10 @@ export function ControllerRoute({method, path, authMiddleware}: RouteConfigProps
                 });
             }
         }
-
         if (authMiddleware) {
             app[method](path, authMiddleware, response);
         } else {
             app[method](path, response);
         }
-
     }
 }
