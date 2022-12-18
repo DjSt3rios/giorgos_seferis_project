@@ -7,11 +7,11 @@ const Link_entity_1 = require("./entities/Link.entity");
 const User_entity_1 = require("./entities/User.entity");
 exports.mysqlDt = new typeorm_1.DataSource({
     type: "mysql",
-    host: "127.0.0.1",
+    host: "sql.freedb.tech",
     port: 3306,
-    username: "root",
-    password: "sterios",
-    database: "seferis",
+    username: "freedb_userg",
+    password: "Ya4dPd!Z9bB7jRP",
+    database: "freedb_g_seferis",
     entities: [Book_entity_1.Book, Link_entity_1.Link, User_entity_1.User],
     logging: true,
     synchronize: false,

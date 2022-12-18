@@ -48,22 +48,20 @@ export class UsersController {
             res.json({ success: false, message: 'A user with this username already exists.' });
             return;
         }
-        console.log('No user found! Creating new...');
         const encryptedPwd = await bcrypt.hash(userData.password, 6);
-        console.log('Encrypted pw:', encryptedPwd);
-        const user = await mysqlDt.getRepository(User).save({ ...userData, password: encryptedPwd }).catch((err) => {
+        const newUser = await mysqlDt.getRepository(User).save({ ...userData, password: encryptedPwd }).catch((err) => {
             console.error('Insert error:', err);
             return null;
         });
-        if (user) {
+        if (newUser) {
             const token = jwt.sign(
-                { id: user.id, username: user.username },
+                { id: newUser.id, username: newUser.username },
                 "uth2022www",
                 {
                     expiresIn: "1y",
                 }
             );
-            res.json({ success: !!user, accessToken: token });
+            res.json({ success: !!newUser, accessToken: token });
             return;
         }
         res.json({ success: false });
@@ -74,11 +72,17 @@ export class UsersController {
         path: '/api/users/:id',
         authMiddleware: authUser,
     }) async deleteUser(req: Request, res: Response): Promise<void> {
-        const user = await mysqlDt.getRepository(User).delete(req.params.id).catch((err) => {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
+        const deleteResult = await mysqlDt.getRepository(User).delete(req.params.id).catch((err) => {
             console.error('delete error:', err);
             return null;
         });
-        res.json({ success: !!user });
+        res.json({ success: !!deleteResult });
     };
 
     @ControllerRoute({
@@ -86,19 +90,24 @@ export class UsersController {
         path: '/api/users/:id',
         authMiddleware: authUser,
     }) async updateUser(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const userData: UserModel = req.body;
-        const user = await mysqlDt.getRepository(User).update(req.params.id, userData).catch((err) => {
+        const updateResult = await mysqlDt.getRepository(User).update(req.params.id, userData).catch((err) => {
             console.error('update error:', err);
             return null;
         });
-        res.json({ success: !!user });
+        res.json({ success: !!updateResult });
     };
 
     @ControllerRoute({
         method: METHOD.POST,
         path: '/api/users/login'
     }) async loginUser(req: Request, res: Response): Promise<void> {
-        console.log('LOGIN REQUEST!');
         const userData: UserModel = req.body;
         const user = await mysqlDt.getRepository(User).findOne({ where: { username: userData.username }}).catch((err) => {
             console.error('get error:', err);

@@ -14,6 +14,7 @@ const routes_1 = require("../routes/routes");
 const database_1 = require("../database");
 const Book_entity_1 = require("../entities/Book.entity");
 const auth_1 = require("../middlewares/auth");
+const User_entity_1 = require("../entities/User.entity");
 class BooksController {
     async getAllBooks(req, res) {
         const books = await database_1.mysqlDt.getRepository(Book_entity_1.Book).find().catch((err) => {
@@ -32,6 +33,12 @@ class BooksController {
     }
     ;
     async createBook(req, res) {
+        const reqUser = req.user;
+        const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { id: reqUser?.id } });
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges' });
+            return;
+        }
         const bookData = req.body;
         const book = await database_1.mysqlDt.getRepository(Book_entity_1.Book).insert(bookData).catch((err) => {
             console.error('Insert error:', err);
@@ -41,6 +48,12 @@ class BooksController {
     }
     ;
     async deleteBook(req, res) {
+        const reqUser = req.user;
+        const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { id: reqUser?.id } });
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges' });
+            return;
+        }
         const book = await database_1.mysqlDt.getRepository(Book_entity_1.Book).delete(req.params.id).catch((err) => {
             console.error('delete error:', err);
             return null;
@@ -49,9 +62,13 @@ class BooksController {
     }
     ;
     async updateBook(req, res) {
+        const reqUser = req.user;
+        const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { id: reqUser?.id } });
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges' });
+            return;
+        }
         const bookData = req.body;
-        console.log('Updating', req.params.id);
-        console.log('Data:', bookData);
         const book = await database_1.mysqlDt.getRepository(Book_entity_1.Book).update(req.params.id, bookData).catch((err) => {
             console.error('update error:', err);
             return null;

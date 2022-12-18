@@ -14,6 +14,7 @@ const routes_1 = require("../routes/routes");
 const database_1 = require("../database");
 const Link_entity_1 = require("../entities/Link.entity");
 const auth_1 = require("../middlewares/auth");
+const User_entity_1 = require("../entities/User.entity");
 class LinksController {
     async getAllLinks(req, res) {
         const links = await database_1.mysqlDt.getRepository(Link_entity_1.Link).find().catch((err) => {
@@ -32,6 +33,12 @@ class LinksController {
     }
     ;
     async createLink(req, res) {
+        const reqUser = req.user;
+        const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { id: reqUser?.id } });
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges' });
+            return;
+        }
         const linkData = req.body;
         const link = await database_1.mysqlDt.getRepository(Link_entity_1.Link).insert(linkData).catch((err) => {
             console.error('Insert error:', err);
@@ -41,6 +48,12 @@ class LinksController {
     }
     ;
     async deleteLink(req, res) {
+        const reqUser = req.user;
+        const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { id: reqUser?.id } });
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges' });
+            return;
+        }
         const link = await database_1.mysqlDt.getRepository(Link_entity_1.Link).delete(req.params.id).catch((err) => {
             console.error('delete error:', err);
             return null;
@@ -49,6 +62,12 @@ class LinksController {
     }
     ;
     async updateLink(req, res) {
+        const reqUser = req.user;
+        const user = await database_1.mysqlDt.getRepository(User_entity_1.User).findOne({ where: { id: reqUser?.id } });
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges' });
+            return;
+        }
         const linkData = req.body;
         const link = await database_1.mysqlDt.getRepository(Link_entity_1.Link).update(req.params.id, linkData).catch((err) => {
             console.error('update error:', err);

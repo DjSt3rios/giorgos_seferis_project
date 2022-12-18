@@ -4,6 +4,7 @@ import { mysqlDt } from '../database';
 import { Link } from '../entities/Link.entity';
 import { LinkModel } from '../models/link.model';
 import { authUser } from '../middlewares/auth';
+import { User } from '../entities/User.entity';
 
 export class LinksController {
     @ControllerRoute({
@@ -33,6 +34,12 @@ export class LinksController {
         path: '/api/links/new',
         authMiddleware: authUser,
     }) async createLink(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const linkData: LinkModel = req.body;
         const link = await mysqlDt.getRepository(Link).insert(linkData).catch((err) => {
             console.error('Insert error:', err);
@@ -46,6 +53,12 @@ export class LinksController {
         path: '/api/links/:id',
         authMiddleware: authUser,
     }) async deleteLink(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const link = await mysqlDt.getRepository(Link).delete(req.params.id).catch((err) => {
             console.error('delete error:', err);
             return null;
@@ -58,6 +71,12 @@ export class LinksController {
         path: '/api/links/:id',
         authMiddleware: authUser,
     }) async updateLink(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const linkData: LinkModel = req.body;
         const link = await mysqlDt.getRepository(Link).update(req.params.id, linkData).catch((err) => {
             console.error('update error:', err);

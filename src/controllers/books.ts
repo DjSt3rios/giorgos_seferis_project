@@ -4,6 +4,7 @@ import { ControllerRoute, METHOD } from '../routes/routes';
 import { mysqlDt } from '../database';
 import { Book } from '../entities/Book.entity';
 import { authUser } from '../middlewares/auth';
+import { User } from '../entities/User.entity';
 
 export class BooksController {
     @ControllerRoute({
@@ -33,6 +34,12 @@ export class BooksController {
         path: '/api/books/new',
         authMiddleware: authUser,
     }) async createBook(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const bookData: BookModel = req.body;
         const book = await mysqlDt.getRepository(Book).insert(bookData).catch((err) => {
             console.error('Insert error:', err);
@@ -46,6 +53,12 @@ export class BooksController {
         path: '/api/books/:id',
         authMiddleware: authUser,
     }) async deleteBook(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const book = await mysqlDt.getRepository(Book).delete(req.params.id).catch((err) => {
             console.error('delete error:', err);
             return null;
@@ -58,9 +71,13 @@ export class BooksController {
         path: '/api/books/:id',
         authMiddleware: authUser,
     }) async updateBook(req: Request, res: Response): Promise<void> {
+        const reqUser = (req as any).user;
+        const user = await  mysqlDt.getRepository(User).findOne({ where: { id: reqUser?.id }});
+        if (!user.isAdmin) {
+            res.json({ success: false, message: 'Invalid privileges'});
+            return;
+        }
         const bookData: BookModel = req.body;
-        console.log('Updating', req.params.id);
-        console.log('Data:', bookData);
         const book = await mysqlDt.getRepository(Book).update(req.params.id, bookData).catch((err) => {
             console.error('update error:', err);
             return null;
